@@ -15,13 +15,48 @@ spec:
       labels:
         app: demo-nginx
     spec:
+      ###########################################
+      # INIT CONTAINERS
+      ###########################################
+      # 1) git-sync: Clones the repo at /git/argocd
+      # 2) move-html: Copies the files to /usr/share/nginx/html
       initContainers:
+      - name: git-sync
+        image: k8s.gcr.io/git-sync/git-sync:v3.4.0
+        env:
+        - name: GIT_SYNC_REPO
+          value: "https://github.com/jhunter7/argocd.git"  # Your GitHub repo
+        - name: GIT_SYNC_BRANCH
+          value: "main"
+        - name: GIT_SYNC_ROOT
+          value: "/git"
+        - name: GIT_SYNC_DEST
+          value: "argocd"     # stable folder name => /git/argocd
+        - name: GIT_SYNC_WAIT
+          value: "30"
+        volumeMounts:
+        - name: git-volume
+          mountPath: /git
+        command:
+          # Override the command so it clones once and exits
+          - "sh"
+        args:
+          - "-c"
+          - |
+            echo "=== Running git-sync once as an init container ==="
+            /git-sync -one-time
+            echo "=== git-sync init done ==="
       - name: move-html
         image: busybox
         command:
           - "sh"
           - "-c"
           - |
+            echo "===== Debug: Listing /git/argocd/manifests/html manually ====="
+            ls -l /git/argocd/manifests/html || echo "No such directory"
+            echo "===== Debug: Contents of index.html ====="
+            cat /git/argocd/manifests/html/index.html || echo "No index.html to cat"
+
             if [ -d /git/argocd/manifests/html ] && [ "$(ls -A /git/argocd/manifests/html)" ]; then
               cp -r /git/argocd/manifests/html/* /usr/share/nginx/html/
             else
@@ -32,6 +67,10 @@ spec:
           mountPath: /git
         - name: html-volume
           mountPath: /usr/share/nginx/html
+
+      ###########################################
+      # MAIN CONTAINER
+      ###########################################
       containers:
       - name: nginx
         image: nginx:1.27
@@ -40,20 +79,10 @@ spec:
         volumeMounts:
         - name: html-volume
           mountPath: /usr/share/nginx/html
-      - name: git-sync
-        image: k8s.gcr.io/git-sync/git-sync:v3.4.0
-        env:
-        - name: GIT_SYNC_REPO
-          value: "https://github.com/jhunter7/argocd.git"  # Replace with your GitHub repo URL
-        - name: GIT_SYNC_BRANCH
-          value: "main"
-        - name: GIT_SYNC_ROOT
-          value: "/git"
-        - name: GIT_SYNC_WAIT
-          value: "30"  # Poll every 30 seconds for changes
-        volumeMounts:
-        - name: git-volume
-          mountPath: /git
+
+      ###########################################
+      # VOLUMES
+      ###########################################
       volumes:
       - name: git-volume
         emptyDir: {}
