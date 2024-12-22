@@ -18,7 +18,15 @@ spec:
       initContainers:
       - name: move-html
         image: busybox
-        command: ["sh", "-c", "cp -r /git/manifests/html/* /usr/share/nginx/html/"]
+        command:
+          - "sh"
+          - "-c"
+          - |
+            if [ -d /git/argocd/manifests/html ] && [ "$(ls -A /git/argocd/manifests/html)" ]; then
+              cp -r /git/argocd/manifests/html/* /usr/share/nginx/html/
+            else
+              echo 'No files to copy'
+            fi
         volumeMounts:
         - name: git-volume
           mountPath: /git
