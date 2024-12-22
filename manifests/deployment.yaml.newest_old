@@ -15,40 +15,29 @@ spec:
       labels:
         app: demo-nginx
     spec:
-      initContainers:
-      - name: move-html
-        image: busybox
-        command: ["sh", "-c", "cp -r /git/manifests/html/* /usr/share/nginx/html/"]
-        volumeMounts:
-        - name: git-volume
-          mountPath: /git
-        - name: html-volume
-          mountPath: /usr/share/nginx/html
       containers:
       - name: nginx
         image: nginx:1.27
         ports:
         - containerPort: 80
         volumeMounts:
-        - name: html-volume
+        - name: git-volume
           mountPath: /usr/share/nginx/html
       - name: git-sync
         image: k8s.gcr.io/git-sync/git-sync:v3.4.0
         env:
         - name: GIT_SYNC_REPO
-          value: "https://github.com/jhunter7/argocd.git"  # Replace with your GitHub repo URL
+          value: "https://github.com/jhunter7/argocd.git"
         - name: GIT_SYNC_BRANCH
           value: "main"
         - name: GIT_SYNC_ROOT
           value: "/git"
         - name: GIT_SYNC_WAIT
-          value: "30"  # Poll every 30 seconds for changes
+          value: "30"
         volumeMounts:
         - name: git-volume
           mountPath: /git
       volumes:
       - name: git-volume
-        emptyDir: {}
-      - name: html-volume
         emptyDir: {}
 
