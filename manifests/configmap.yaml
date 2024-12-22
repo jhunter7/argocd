@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demo-nginx-html
+  namespace: default
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Custom Welcome Page</title>
+    </head>
+    <body>
+        <h1>Welcome to DEMO  NGINX server!</h1>
+    </body>
+    </html>
+

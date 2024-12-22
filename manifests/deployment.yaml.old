@@ -5,7 +5,7 @@ metadata:
   labels:
     app: demo-nginx
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: demo-nginx
@@ -19,12 +19,4 @@ spec:
         image: nginx:1.27
         ports:
         - containerPort: 80
-        volumeMounts:
-        - name: html-volume
-          mountPath: /usr/share/nginx/html/index.html
-          subPath: index.html
-      volumes:
-      - name: html-volume
-        configMap:
-          name: demo-nginx-html
 
