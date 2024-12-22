@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-nginx
+  namespace: argocd                 # The namespace where Argo CD is installed
+spec:
+  project: default                  # Argo CD project (usually "default" if you haven't created custom projects)
+
+  source:
+    repoURL: 'https://github.com/jhunter7/argocd.git'
+    targetRevision: main            # The branch to track
+    path: manifests                 # The directory containing your deployment.yaml
+
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: default              # Where to deploy resources (same as your deployment.yaml)
+
+  # Enable auto-sync
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
