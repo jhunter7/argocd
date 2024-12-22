@@ -11,7 +11,7 @@ data:
         <title>Custom Welcome Page</title>
     </head>
     <body>
-        <h1>Welcome to DEMO  NGINX server!</h1>
+        <h1>Welcome to DEMO 2 ARGOCD  NGINX server!</h1>
     </body>
     </html>
 
